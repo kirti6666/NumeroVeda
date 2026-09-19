@@ -1,0 +1,9 @@
+These three fictional demo portraits were generated with the built-in image-generation tool. They do not depict actual NumeroVeda team members. Published admin portraits replace the demo carousel.
+
+Files: demo-numerologist-1.png, demo-numerologist-2.png, demo-numerologist-3.png.
+
+1. Photorealistic natural editorial portrait for an Indian numerology website, fictional male Indian numerologist aged 48, neatly groomed moustache, warm calm expression, ivory cotton kurta and muted saffron stole, seated in softly blurred sandstone courtyard with greenery, natural morning light, authentic skin texture, waist-up centered symmetrical composition with generous headroom for oval website crop, vertical portrait, no text no watermark, original fictional person not a real practitioner.
+
+2. Photorealistic natural editorial portrait for an Indian numerology website, fictional female Indian numerologist aged 38, dark shoulder-length hair, small bindi, elegant rust orange sari with cream border, approachable calm smile, seated in softly blurred warm cream study with books and greenery, natural window light, authentic skin texture, waist-up centered composition with generous headroom for oval website crop, vertical portrait, no text no watermark, original fictional person not a real practitioner.
+
+3. Photorealistic natural editorial portrait for an Indian numerology website, fictional senior male Indian astrologer aged 60, salt-and-pepper hair and short beard, thin rim spectacles, small sandalwood tilak, cream kurta with subdued burgundy shawl, calm welcoming expression, softly blurred traditional wooden study background, natural warm daylight, authentic skin texture, waist-up centered composition with generous headroom for oval website crop, vertical portrait, no text no watermark, original fictional person not a real practitioner.

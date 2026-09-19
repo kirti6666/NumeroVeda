@@ -1,0 +1,4 @@
+'use client';
+import {Quote,MessageSquareHeart} from 'lucide-react';
+import {usePublic} from './provider';
+export function Testimonials(){const {data}=usePublic();return <section className="testimonials"><div className="container"><div className="section-heading"><div><div className="eyebrow">WORDS THAT STAY WITH US</div><h2>A little clarity can mean a lot.</h2></div></div>{data?.testimonials.length?<div className="testimonial-grid">{data.testimonials.map((t,i)=><blockquote key={t.id} className={i%3===1?'testimonial featured':'testimonial'}><Quote size={28} strokeWidth={1}/><p>{t.quote}</p><footer>{t.name}<span>{t.service}</span></footer></blockquote>)}</div>:<div className="empty-testimonials"><MessageSquareHeart size={30} strokeWidth={1}/><div><h3>Every experience has a story.</h3><p>Client stories will be shared here, with their permission.</p></div></div>}</div></section>;}

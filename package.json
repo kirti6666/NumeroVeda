@@ -1,0 +1,30 @@
+{
+  "name": "numeroveda",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "next dev --hostname 127.0.0.1",
+    "dev:api": "tsx watch server/index.ts",
+    "build": "next build",
+    "start": "node scripts/start-production.cjs",
+    "start:api": "tsx server/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "setup:local": "tsx scripts/setup-local.ts"
+  },
+  "engines": { "node": ">=22.18.0" },
+  "overrides": { "shell-quote": "1.8.3" },
+  "dependencies": {
+    "next": "^16.0.0", "react": "^19.2.0", "react-dom": "^19.2.0",
+    "express": "^5.1.0", "cookie-parser": "^1.4.7", "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0", "multer": "^2.0.2", "zod": "^4.1.0", "dotenv": "^17.2.0",
+    "lucide-react": "^0.468.0", "nodemailer": "^7.0.0", "sharp": "^0.34.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0", "tsx": "^4.20.0", "concurrently": "^9.2.0",
+    "@types/node": "^22.18.0", "@types/react": "^19.2.0", "@types/react-dom": "^19.2.0",
+    "@types/express": "^5.0.3", "@types/cookie-parser": "^1.4.9", "@types/multer": "^2.0.0", "@types/nodemailer": "^7.0.0"
+  }
+}
