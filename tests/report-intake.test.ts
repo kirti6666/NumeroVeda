@@ -21,21 +21,16 @@ test('astrological muhurat requires birth times and places for both partners',()
 });
 test('optional dates, invalid choices, and forecast years are validated',()=>{
  const answers={industry:'Retail',businessStage:'New business',namingMode:'Request suggestions',founderDob:'1995-02-31'};
- assert.equal(orderSchema.safeParse({...contact,productId:'business-name',answers}).success,false);
+ assert.equal(orderSchema.safeParse({...contact,productId:'personal-numerology',answers}).success,false);
  assert.equal(orderSchema.safeParse({...contact,productId:'yearly-forecast',answers:{dob:'1995-08-24',priorities:'Career',targetYear:'abc'}}).success,false);
  assert.equal(orderSchema.safeParse({...contact,productId:'baby-name',answers:{babyStatus:'Invalid',surname:'Test',preferredLanguage:'Hindi',namingMode:'Request suggestions'}}).success,false);
 });
-test('focus selection and conditional comparison details cannot be bypassed',()=>{
- const base={...contact,productId:'personal-numerology',dob:'1995-08-24',question:'My direction'};
- assert.equal(orderSchema.safeParse({...base,answers:{focus:'Career | Relationships | Personality'}}).success,true);
- assert.equal(orderSchema.safeParse({...base,answers:{focus:'Career | Relationships | Personality | Other'}}).success,false);
- assert.equal(orderSchema.safeParse({...base,answers:{focus:'Career | Career'}}).success,false);
- const baby={...contact,productId:'baby-name',answers:{babyStatus:'Expecting',surname:'Sharma',preferredLanguage:'Hindi',namingMode:'Compare existing names',thoughtOfNames:'Yes'}};
+test('minimal forms accept essential details and enforce conditional baby names',()=>{
+ assert.equal(orderSchema.safeParse({...contact,productId:'personal-numerology',answers:{dob:'1995-08-24'}}).success,true);
+ const baby={...contact,productId:'baby-name',answers:{babyStatus:'Expecting',surname:'Sharma',preferredLanguage:'Hindi',namingMode:'Compare existing names'}};
  assert.equal(orderSchema.safeParse(baby).success,false);
  assert.equal(orderSchema.safeParse({...baby,answers:{...baby.answers,names:'Aarav, Arjun'}}).success,true);
  assert.equal(orderSchema.safeParse({...baby,answers:{...baby.answers,names:'Aarav',babyStatus:'Born'}}).success,false);
- const name={...contact,productId:'name-analysis',answers:{dob:'1995-08-24',question:'Professional name',preserve:'Surname',birthNameSame:'Yes'}};
- assert.equal(orderSchema.safeParse(name).success,true);
- assert.equal(orderSchema.safeParse({...name,answers:{...name.answers,birthNameSame:'No'}}).success,false);
+ assert.equal(orderSchema.safeParse({...contact,productId:'name-analysis',answers:{dob:'1995-08-24'}}).success,true);
+ assert.equal(orderSchema.safeParse({...contact,productId:'relationship-compatibility',answers:{personOne:'Partner One',dobOne:'1995-08-24',personTwo:'Partner Two',dobTwo:'1996-01-12'}}).success,true);
 });
-

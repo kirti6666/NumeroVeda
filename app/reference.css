@@ -81,3 +81,36 @@
 .reference-copy>p{color:#554a43}
 .reference-copy h1{text-shadow:0 2px 18px #faf6efb3}
 @media(max-width:600px){.reference-copy:before{inset:-48px -35px -35px;opacity:.32;background-size:cover;mask-image:radial-gradient(ellipse at center,#000 18%,#000b 48%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 18%,#000b 48%,transparent 75%)}}
+/* Comfortable touch targets and readable fields on narrow phones. */
+@media(max-width:760px){
+ input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px;min-height:48px;max-width:100%;box-sizing:border-box}
+ .checkout-grid{grid-template-columns:minmax(0,1fr);gap:18px}
+ .checkout-grid>*,.form-grid>*,.intake-fields>*{min-width:0}
+ .checkout-form,.order-summary{padding:20px}
+ .checkout-form h2{font-size:1.8rem}
+ .checkout-grid .button{min-height:48px;white-space:normal;text-align:center}
+ .checkout-grid label{font-size:.85rem;line-height:1.5}
+ .checkout-grid .page-intro{margin-bottom:22px}
+ .checkbox-label{align-items:flex-start;gap:10px}
+ .checkbox-label input{flex-shrink:0;width:20px;height:20px;margin-top:2px}
+ .checkout-review dd{overflow-wrap:anywhere}
+ .page-intro.compact h1{font-size:2.65rem}
+ .report-intake{margin-top:20px;padding-top:18px}
+ .report-intake textarea{min-height:90px}
+ .reference-calculator input,.reference-calculator select{font-size:16px}
+ .reference-form-title h2{font-size:1.2rem}
+ .footer-grid{gap:20px}
+}
+@media(max-width:380px){
+ .container{width:calc(100% - 28px)}
+ .reference-report{grid-template-columns:80px minmax(0,1fr);padding:14px;gap:10px}
+ .book-scene{width:78px}.report-book{width:70px;min-height:120px}.book-page{right:-2px;width:40px}
+ .report-description h3{font-size:1.2rem;overflow-wrap:anywhere}
+ .reference-copy h1{font-size:2.5rem}
+ .reference-badge{max-width:100%;font-size:.5rem;letter-spacing:0}
+ .reference-calculator{padding:17px}.birth-selects>div{gap:5px;grid-template-columns:.8fr 1.2fr 1fr}
+ .reference-calculator select{padding:10px 5px}
+ .reference-header .brand{font-size:1.05rem}.report-access{padding-inline:9px;gap:3px}
+ .footer-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){.reference-header .nav{gap:8px}.reference-header .brand{font-size:.95rem;gap:5px}.reference-header .brand-mark{width:26px;height:26px;flex-shrink:0}.report-access{flex-shrink:0;white-space:nowrap;font-size:.62rem;padding:6px 8px}.report-access svg{width:23px;height:23px}.checkout-form h2{font-size:1.55rem}.page-intro.compact h1{font-size:2.35rem}}
