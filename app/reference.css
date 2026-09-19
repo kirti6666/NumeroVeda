@@ -116,3 +116,16 @@
 @media(max-width:380px){.reference-header .nav{gap:8px}.reference-header .brand{font-size:.95rem;gap:5px}.reference-header .brand-mark{width:26px;height:26px;flex-shrink:0}.report-access{flex-shrink:0;white-space:nowrap;font-size:.62rem;padding:6px 8px}.report-access svg{width:23px;height:23px}.checkout-form h2{font-size:1.55rem}.page-intro.compact h1{font-size:2.35rem}}
 .reports-page{padding-block:38px}.reports-page .page-intro{margin:0 auto 28px}.reports-page .page-intro h1{font-size:3rem;margin:12px 0}.reports-page .page-intro p{font-size:.9rem}.reports-page .benefit-row{gap:20px;padding-block:24px}.reports-page .faq{margin-top:30px}
 @media(max-width:600px){.reports-page{padding-block:28px}.reports-page .page-intro h1{font-size:2.35rem}.reports-page .page-intro{margin-bottom:22px}}
+.reference-home .client-stories{padding-block:46px;background:linear-gradient(180deg,#fffdf9,#f8f2eb)}
+.client-stories>.container{max-width:1080px}
+.client-stories .section-heading h2{font-size:2.65rem;line-height:1.08}
+.testimonial-intro{font-size:.88rem;margin-top:12px}
+.sample-review-note{text-align:center;font-size:.72rem;color:var(--muted);margin:-7px 0 22px}
+.review-card-top{display:flex;justify-content:space-between;align-items:center;width:100%;gap:12px}
+.review-card-top>span{font-size:.56rem;letter-spacing:.12em;opacity:.7}
+.reference-home .client-stories .testimonial{text-align:left;align-items:stretch;border-radius:14px;padding:24px;box-shadow:0 8px 24px #48263106}
+.reference-home .client-stories .testimonial p{font-size:1.4rem;line-height:1.4;margin-block:18px 23px}
+.client-stories .testimonial footer{display:flex;align-items:center;gap:11px}
+.client-stories .testimonial footer strong{font-size:.78rem;font-weight:500}
+.client-stories .testimonial footer .review-avatar{display:grid;place-items:center;width:35px;height:35px;flex-shrink:0;border:1px solid #a7803e55;border-radius:50%;font:1.2rem var(--serif);margin:0;opacity:1}
+@media(max-width:760px){.reference-home .client-stories{padding-block:32px}.client-stories .section-heading h2{font-size:2.2rem}.reference-home .client-stories .testimonial{padding:20px}.reference-home .client-stories .testimonial p{font-size:1.3rem;margin-block:14px 18px}.sample-review-note{max-width:280px;margin-inline:auto}}
