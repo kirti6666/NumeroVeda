@@ -75,3 +75,9 @@
 .checkout-review{margin:20px 0}.checkout-review>div{padding:10px 0;border-bottom:1px solid var(--line)}.checkout-review dt{font-size:.75rem;color:var(--muted)}.checkout-review dd{margin:4px 0 0;white-space:pre-line;overflow-wrap:anywhere;font-size:.9rem}.checkout-answers{margin-bottom:24px}.checkout-answers summary{cursor:pointer;font-size:.88rem}.order-summary>.button{margin-top:20px}
 .portrait-demo-label{position:absolute;bottom:0;left:50%;transform:translateX(-50%);z-index:5;font-size:.6rem;color:var(--muted);white-space:nowrap}
 .portrait-toggle{position:absolute;top:0;right:0;z-index:5;width:30px;height:30px;background:var(--white)}
+.reference-hero{overflow:hidden;background:linear-gradient(180deg,#f8f4ec 0%,#faf9f7 100%)}
+.reference-copy{position:relative;isolation:isolate}
+.reference-copy:before{content:'';position:absolute;z-index:-1;pointer-events:none;inset:-95px -75px;background:url('/images/numerology-hero.png') center/cover no-repeat;opacity:.34;mask-image:radial-gradient(ellipse at center,#000 15%,#000b 45%,transparent 72%);-webkit-mask-image:radial-gradient(ellipse at center,#000 15%,#000b 45%,transparent 72%)}
+.reference-copy>p{color:#554a43}
+.reference-copy h1{text-shadow:0 2px 18px #faf6efb3}
+@media(max-width:600px){.reference-copy:before{inset:-48px -35px -35px;opacity:.32;background-size:cover;mask-image:radial-gradient(ellipse at center,#000 18%,#000b 48%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 18%,#000b 48%,transparent 75%)}}
