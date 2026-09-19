@@ -114,3 +114,5 @@
  .footer-grid{grid-template-columns:1fr}
 }
 @media(max-width:380px){.reference-header .nav{gap:8px}.reference-header .brand{font-size:.95rem;gap:5px}.reference-header .brand-mark{width:26px;height:26px;flex-shrink:0}.report-access{flex-shrink:0;white-space:nowrap;font-size:.62rem;padding:6px 8px}.report-access svg{width:23px;height:23px}.checkout-form h2{font-size:1.55rem}.page-intro.compact h1{font-size:2.35rem}}
+.reports-page{padding-block:38px}.reports-page .page-intro{margin:0 auto 28px}.reports-page .page-intro h1{font-size:3rem;margin:12px 0}.reports-page .page-intro p{font-size:.9rem}.reports-page .benefit-row{gap:20px;padding-block:24px}.reports-page .faq{margin-top:30px}
+@media(max-width:600px){.reports-page{padding-block:28px}.reports-page .page-intro h1{font-size:2.35rem}.reports-page .page-intro{margin-bottom:22px}}
