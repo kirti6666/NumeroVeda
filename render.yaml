@@ -1,0 +1,29 @@
+# Paid compute and persistent disk; review Render's cost before creating.
+services:
+  - type: web
+    name: numeroveda-api
+    runtime: node
+    plan: 0.5c-512mb
+    region: singapore
+    branch: main
+    buildCommand: npm ci --include=dev
+    startCommand: npm run start:api
+    healthCheckPath: /api/health
+    numInstances: 1
+    disk:
+      name: numeroveda-data
+      mountPath: /var/data/numeroveda
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      - key: NODE_ENV
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: DATA_DIR
+        value: /var/data/numeroveda
+      - key: APP_ORIGIN
+        value: https://nmveda.vercel.app
+      - key: CASHFREE_ENV
+        value: sandbox
