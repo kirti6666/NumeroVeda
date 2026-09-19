@@ -1,70 +1,76 @@
-# NumeroVeda: Vercel website + persistent Node backend
+# Deploy NumeroVeda on Vercel
 
-The Vercel site is https://nmveda.vercel.app. Its `/api/public` currently
-returns `DNS_HOSTNAME_RESOLVED_PRIVATE`: the API rewrite targets a private
-address. Vercel does not start this repository's separate Node process.
-Do not use localhost as Vercel's API_URL.
+Next.js now includes the Node API at `pages/api/[...path].ts`. No separate Render
+backend, port 4000 or API_URL rewrite is required. The Pages API adapter preserves
+Express routes, multipart parsing and raw Cashfree webhook signatures.
 
-## 1. Create the backend on Render
+## Credentials
 
-Open https://dashboard.render.com/select-repo?type=blueprint and connect
-`kirti6666/NumeroVeda`, branch `main`. Render reads `render.yaml`.
-Review the paid compute and 1 GB disk cost before confirming creation.
-The persistent disk stores SQLite, uploaded portraits and private report PDFs.
-Keep one instance; do not remove the disk or use ephemeral storage for orders.
+Use `.env.example` as the complete credential checklist. In Vercel Project Settings
+> Environment Variables add:
 
-The blueprint starts only the backend, binds to Render's PORT, and checks
-`/api/health`. After deployment copy the actual HTTPS service URL from Render.
-Open `<backend-url>/api/health` (expect `{"ok":true}`) and
-`<backend-url>/api/public` (expect nine products).
+- `APP_ORIGIN=https://nmveda.vercel.app` (no trailing slash).
+- `MONGODB_URI` from MongoDB Atlas and `MONGODB_DB=numeroveda`.
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+- `CLOUDINARY_FOLDER=numeroveda` (optional; choose a separate test folder).
+- Cashfree sandbox credentials and SMTP credentials before enabling payment.
 
-## 2. Connect Vercel
+Use an Atlas database user with read/write permission to this database. Configure
+Atlas Network Access to allow the deployment's connection. Atlas supports the
+transactions used for initialization; standalone MongoDB without a replica set
+is not supported. Remove the old `API_URL`. No JWT or NextAuth secret is used:
+admin sessions are random tokens, hashed in MongoDB, with HttpOnly cookies.
+Set Vercel Node runtime to 22.x or newer and redeploy after changing variables.
+Do not share the production database with unrestricted preview deployments.
 
-In Vercel project Settings → Environment Variables set, for Production:
+## First administrator
 
-```dotenv
-API_URL=https://YOUR-ACTUAL-BACKEND-HOST
-```
-
-Use the actual Render service URL, without `/api` or a trailing slash.
-Redeploy the Vercel project: rewrites are generated at build time.
-Keep backend APP_ORIGIN exactly `https://nmveda.vercel.app` (no trailing slash).
-The browser continues calling the same-origin `/api` paths on Vercel;
-admin cookies and uploaded images also use this proxy.
-
-Verify `https://nmveda.vercel.app/api/health`, `/api/public`, and `/admin`.
-If the production domain changes, update APP_ORIGIN on Render as well.
-Preview domains cannot change production data unless deliberately authorized.
-
-## 3. Create the production administrator
-
-Your local database and password are not copied to Render. In the Render
-service environment, temporarily add ADMIN_PASSWORD with a unique password
-of at least 12 characters. In the running service's Shell run:
+On your computer, put the same MongoDB credentials in the ignored `.env`, set
+`ADMIN_EMAIL` and a unique `ADMIN_PASSWORD` of at least 12 characters, then run:
 
 ```sh
 npm run admin:create
 ```
 
-Enter your administrator email when prompted, then remove ADMIN_PASSWORD
-from the environment. Sign in at https://nmveda.vercel.app/admin.
-Create the administrator in the running service, not a build/pre-deploy job:
-the persistent disk must be mounted. Re-enter your report prices and content;
-the fresh database starts all nine reports at ₹499.
+Remove ADMIN_PASSWORD afterwards. The script creates an administrator in MongoDB
+without a public signup endpoint and does not reset an existing user.
+Sign in at https://nmveda.vercel.app/admin.
 
-## 4. Configure payment and email on Render
+The first initialization creates nine reports at INR 499 and disables payments.
+Later initialization never resets prices or deleted reports. Your local SQLite
+database, login, prices and files remain on your computer; they are not copied to
+MongoDB automatically. Set production prices, content, support details and policies
+in the production admin panel.
 
-Use `.env.example` as the variable list. Add CASHFREE_CLIENT_ID,
-CASHFREE_CLIENT_SECRET, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS and MAIL_FROM
-in Render's environment settings, not in Git or the frontend.
-Use sandbox payments first. In admin add support details and enable checkout.
-Set Cashfree's webhook to:
-`https://nmveda.vercel.app/api/payments/cashfree/webhook`.
+## Images and private reports
 
-Before live payments, test a sandbox purchase, confirmation email, admin
-answers, PDF upload/review/release, delivery email and private download.
-Then configure approved production Cashfree credentials. Back up the database
-and files consistently as described in README.md.
+Cloudinary stores public portraits and authenticated raw PDF assets. The app checks
+an admin session or customer access code before fetching a PDF. Customer downloads
+also require delivered status; refunds remove access. Time-limited Cloudinary URLs
+stay on the server. PDFs are never served through the public media route.
+Check that your Cloudinary account allows PDF delivery; keep uploads authenticated.
 
-This blueprint prepares deployment; it does not create a hosting account,
-purchase a plan, transfer local customer data or configure Vercel automatically.
+Uploads and report downloads are limited to 4 MB to fit Vercel's 4.5 MB function
+payload limit. Compress larger PDFs/images before upload.
+
+## Payments and emails
+
+Register `https://nmveda.vercel.app/api/payments/cashfree/webhook` with Cashfree and
+whitelist the site domain. Add support details and enable checkout in admin after
+configuring sandbox credentials. Verification checks amount/currency server-side.
+MongoDB uses atomic payment updates, unique payment IDs and a shared email lease
+to prevent parallel confirmation sends. SMTP cannot guarantee exactly-once delivery
+if a process crashes after sending but before recording success; check before retry.
+
+## Verify before accepting payments
+
+1. `/api/health` and `/api/public` succeed; live prices replace the outage preview.
+2. Admin login, prices and content persist after redeploy.
+3. A sandbox checkout stores the category answers and sends confirmation.
+4. Upload/review/release a sample PDF; check customer download and delivery email.
+5. Invalid access codes and unreleased/refunded orders cannot download reports.
+6. Back up MongoDB and Cloudinary assets for the live service.
+
+Cashfree, SMTP, Atlas and Cloudinary require your account credentials. Committing
+code does not configure those accounts. Local SQLite mode remains available for
+development; cloud service checks must be repeated with your actual accounts.

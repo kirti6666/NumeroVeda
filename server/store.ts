@@ -1,0 +1,47 @@
+import {randomUUID} from 'node:crypto';
+import type {Entry,Kind,Order,Settings} from '../lib/types';
+import {defaultSettings} from './defaults';
+import {mongo,usesMongo,localDb} from './mongo';
+const conflict=()=>Object.assign(new Error('This record changed in another request. Reload before saving.'),{status:409});
+const versions=new WeakMap<Order,number>();
+export async function settings():Promise<Settings>{return usesMongo()?{...defaultSettings,...(await (await mongo()).collection('settings').findOne({name:'site'}))?.data}:(await localDb()).settings();}
+export async function setSettings(value:Settings){if(usesMongo())await (await mongo()).collection('settings').updateOne({name:'site'},{$set:{data:value}},{upsert:true});else (await localDb()).db.prepare('UPDATE settings SET data=? WHERE id=1').run(JSON.stringify(value));}
+export async function audit(action:string,target:string){if(usesMongo())await (await mongo()).collection('audit').insertOne({id:randomUUID(),at:new Date().toISOString(),action,target});else (await localDb()).audit(action,target);}
+export async function recentAudit(){return usesMongo()?(await mongo()).collection('audit').find({},{projection:{_id:0}}).sort({at:-1}).limit(15).toArray():(await localDb()).db.prepare('SELECT * FROM audit ORDER BY at DESC LIMIT 15').all();}
+export async function entries(kind:Kind):Promise<Entry[]>{return usesMongo()?(await (await mongo()).collection('content').find({kind}).toArray()).map(r=>({...r.data,version:r.version})):(await localDb()).entries(kind);}
+export async function saveEntry(kind:Kind,item:Entry){
+ if(!usesMongo())return (await localDb()).saveEntry(kind,item);
+ const c=(await mongo()).collection('content');const prior=await c.findOne({kind,id:item.id});
+ if(prior&&item.version!==undefined&&item.version!==prior.version)throw conflict();
+ const naturalKey=kind==='panchang'?`${item.date}:${String(item.city).trim().toLowerCase()}:${item.language}`:kind==='horoscopes'?`${item.date}:${item.sign}:${item.language}`:item.id;
+ const version=(prior?.version||0)+1;const value={...item,version};
+ try{if(prior){const result=await c.updateOne({_id:prior._id,version:prior.version},{$set:{naturalKey,version,data:value}});if(!result.matchedCount)throw conflict();}else await c.insertOne({kind,id:item.id,naturalKey,version,data:value});}
+ catch(error){if((error as {code?:number}).code===11000)throw Object.assign(new Error('An entry with these details already exists.'),{status:409});throw error;}
+ return value;
+}
+export async function deleteEntry(kind:Kind,id:string){if(usesMongo())await (await mongo()).collection('content').deleteOne({kind,id});else (await localDb()).db.prepare('DELETE FROM content WHERE kind=? AND id=?').run(kind,id);}
+export async function allOrders():Promise<Order[]>{return usesMongo()?(await (await mongo()).collection('orders').find({}).sort({'data.createdAt':-1}).toArray()).map(r=>r.data):(await localDb()).allOrders();}
+export async function getOrder(id:string):Promise<Order|undefined>{if(!usesMongo())return (await localDb()).getOrder(id);const row=await (await mongo()).collection('orders').findOne({id});if(!row)return;const order=row.data as Order;versions.set(order,row.version||0);return order;}
+export async function orderHash(id:string){if(usesMongo())return (await (await mongo()).collection('orders').findOne({id}))?.accessHash;return ((await localDb()).db.prepare('SELECT access_hash FROM orders WHERE id=?').get(id) as {access_hash:string}|undefined)?.access_hash;}
+export async function insertOrder(order:Order,accessHash:string){if(usesMongo()){await (await mongo()).collection('orders').insertOne({id:order.id,accessHash,data:order,version:0});versions.set(order,0);}else (await localDb()).db.prepare('INSERT INTO orders VALUES(?,?,?,NULL)').run(order.id,accessHash,JSON.stringify(order));}
+export async function saveOrder(order:Order){if(!usesMongo())return (await localDb()).saveOrder(order);const version=versions.get(order);if(version===undefined)throw conflict();const result=await (await mongo()).collection('orders').updateOne({id:order.id,version},{$set:{data:order},$inc:{version:1}});if(!result.matchedCount)throw conflict();versions.set(order,version+1);}
+export async function paymentSession(id:string,session:string){if(usesMongo())await (await mongo()).collection('orders').updateOne({id},{$set:{'data.cashfreeSession':session},$inc:{version:1}});else {const local=await localDb();const current=local.getOrder(id);if(current){current.cashfreeSession=session;local.saveOrder(current);}}}
+export async function cancelPending(id:string){if(usesMongo())await (await mongo()).collection('orders').updateOne({id,'data.status':'pending_payment'},{$set:{'data.status':'cancelled'},$inc:{version:1}});else {const local=await localDb();const current=local.getOrder(id);if(current?.status==='pending_payment'){current.status='cancelled';local.saveOrder(current);}}}
+export async function recordPayment(id:string,paymentId:string,at:Date){
+ if(!usesMongo()){const order=(await localDb()).getOrder(id);if(!order)throw Object.assign(new Error('Order not found.'),{status:404});if(!order.paidAt){Object.assign(order,{status:'paid',paidAt:at.toISOString(),dueAt:new Date(at.getTime()+86400000).toISOString(),paymentId});(await localDb()).saveOrder(order);}return order;}
+ await (await mongo()).collection('orders').updateOne({id,'data.paidAt':null},{$set:{'data.status':'paid','data.paidAt':at.toISOString(),'data.dueAt':new Date(at.getTime()+86400000).toISOString(),'data.paymentId':paymentId},$inc:{version:1}});
+ const order=await getOrder(id);if(!order)throw Object.assign(new Error('Order not found.'),{status:404});return order;
+}
+export type User={id:string;email:string;password:string};
+export async function findUser(email:string):Promise<User|undefined>{return usesMongo()?(await (await mongo()).collection('users').findOne({email})) as unknown as User||undefined:(await localDb()).db.prepare('SELECT * FROM users WHERE email=?').get(email) as User|undefined;}
+export async function userById(id:string):Promise<User|undefined>{return usesMongo()?(await (await mongo()).collection('users').findOne({id})) as unknown as User||undefined:(await localDb()).db.prepare('SELECT * FROM users WHERE id=?').get(id) as User|undefined;}
+export async function createUser(user:User){if(usesMongo())await (await mongo()).collection('users').insertOne(user);else (await localDb()).db.prepare('INSERT INTO users VALUES(?,?,?)').run(user.id,user.email,user.password);}
+export async function sessionUser(hash:string):Promise<string|undefined>{if(usesMongo())return (await (await mongo()).collection('sessions').findOne({hash,expiresAt:{$gt:new Date()}}))?.userId;return ((await localDb()).db.prepare('SELECT user_id FROM sessions WHERE hash=? AND expires>?').get(hash,Date.now()) as {user_id:string}|undefined)?.user_id;}
+export async function createSession(hash:string,userId:string){if(usesMongo())await (await mongo()).collection('sessions').insertOne({hash,userId,expiresAt:new Date(Date.now()+8*3600000)});else {const {db}=await localDb();db.prepare('DELETE FROM sessions WHERE expires<?').run(Date.now());db.prepare('INSERT INTO sessions VALUES(?,?,?)').run(hash,userId,Date.now()+8*3600000);}}
+export async function deleteSession(hash:string){if(usesMongo())await (await mongo()).collection('sessions').deleteOne({hash});else (await localDb()).db.prepare('DELETE FROM sessions WHERE hash=?').run(hash);}
+export async function changePassword(id:string,password:string){if(usesMongo()){const d=await mongo();await d.collection('users').updateOne({id},{$set:{password}});await d.collection('sessions').deleteMany({userId:id});}else {const {db}=await localDb();db.prepare('UPDATE users SET password=? WHERE id=?').run(password,id);db.prepare('DELETE FROM sessions WHERE user_id=?').run(id);}}
+export async function mailHistory(orderId:string){return usesMongo()?(await mongo()).collection('mail').find({orderId},{projection:{_id:0,kind:1,status:1,at:1,error:1}}).sort({at:-1}).toArray():(await localDb()).db.prepare('SELECT kind,status,at,error FROM mail WHERE order_id=? ORDER BY at DESC').all(orderId);}
+export async function mailSent(orderId:string){return usesMongo()?!!await (await mongo()).collection('mail').findOne({id:'payment-'+orderId,status:'sent'}):!!(await localDb()).db.prepare("SELECT id FROM mail WHERE order_id=? AND kind='payment' AND status='sent'").get(orderId);}
+export async function recordMail(id:string,orderId:string,kind:string,status:string,error:string|null=null){const at=new Date().toISOString();if(usesMongo())await (await mongo()).collection('mail').updateOne({id},{$set:{orderId,kind,status,at,error}},{upsert:true});else (await localDb()).db.prepare('INSERT INTO mail VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET status=excluded.status,at=excluded.at,error=excluded.error').run(id,orderId,kind,status,at,error);}
+export async function claimMail(orderId:string){if(!usesMongo())return true;const c=(await mongo()).collection('mail');const id='payment-'+orderId;try{const result=await c.updateOne({id,status:{$ne:'sent'},$or:[{leaseUntil:{$lt:new Date()}},{leaseUntil:{$exists:false}}]},{$set:{leaseUntil:new Date(Date.now()+120000)}},{upsert:true});return !!(result.matchedCount||result.upsertedCount);}catch(e){if((e as {code?:number}).code===11000)return false;throw e;}}
+export async function releaseMail(orderId:string){if(usesMongo())await (await mongo()).collection('mail').updateOne({id:'payment-'+orderId},{$unset:{leaseUntil:''}});}

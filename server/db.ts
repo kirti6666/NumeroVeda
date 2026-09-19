@@ -5,7 +5,7 @@ import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import type {Entry,Kind,Order,Settings} from '../lib/types';
 import {reportCatalog} from '../lib/report-catalog';
-export const dataDir=path.resolve(process.env.DATA_DIR||'data');
+export const dataDir=path.resolve(/* turbopackIgnore: true */ process.env.DATA_DIR||'data');
 mkdirSync(dataDir,{recursive:true});mkdirSync(path.join(dataDir,'reports'),{recursive:true});mkdirSync(path.join(dataDir,'images'),{recursive:true});
 export const db=new DatabaseSync(path.join(dataDir,'numeroveda.sqlite'));
 db.exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS orders(id TEXT PRIMARY KEY,access_hash TEXT NOT NULL,
 CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,at TEXT NOT NULL,action TEXT NOT NULL,target TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS mail(id TEXT PRIMARY KEY,order_id TEXT NOT NULL,kind TEXT NOT NULL,status TEXT NOT NULL,at TEXT NOT NULL,error TEXT);
 `);
-export const defaultSettings:Settings={brand:'NumeroVeda',tagline:'NUMEROLOGY · ASTROLOGY · SELF-DISCOVERY',email:'',phone:'',city:'New Delhi',language:'English',heroTitle:'A little clarity. A more intentional tomorrow.',heroDescription:'Explore the meaning in your numbers, find a moment of daily guidance, and discover a report made just for you.',paymentsEnabled:false,refundPolicy:'Contact our support team with your order number for cancellation, correction or refund requests. Please contact us before work begins if you need to cancel. Approved refunds are returned through the original payment method.',privacyPolicy:'We collect the details you submit to prepare and deliver your report. Payment information is processed by Cashfree. We do not sell your personal information. Contact us to request correction or deletion of your data, subject to records we must retain.',terms:'Personal reports provide interpretive numerology guidance. They do not guarantee outcomes or replace professional advice. Delivery is within 12–24 hours of verified payment when complete details are provided. Contact support if you need to correct your details.'};
+import {defaultSettings} from './defaults';
+export {defaultSettings} from './defaults';
 if(!db.prepare('SELECT id FROM settings WHERE id=1').get()){
  db.prepare('INSERT INTO settings VALUES(1,?)').run(JSON.stringify(defaultSettings));
  const products=[{id:'personal-numerology',name:'Personal numerology',description:'Understand your birth number, life path and the themes in your personal numbers.',features:['Birth & life-path analysis','Personal interpretation','Answers to your questions','Expert-reviewed PDF']},{id:'name-analysis',name:'Name analysis',description:'Explore your name through a considered numerological interpretation.',features:['Name number calculation','Name & birth-date alignment','Clear written explanations','Expert-reviewed PDF']},{id:'business-name',name:'Business name analysis',description:'A thoughtful numerological perspective on the name behind your business.',features:['Business name interpretation','Your questions considered','Written observations','Expert-reviewed PDF']}];

@@ -1,6 +1,6 @@
 # NumeroVeda
 
-A Next.js App Router website with a separate Node.js / Express API and SQLite storage. Includes the selected ivory-and-plum UI, free birth/life-path calculator, portrait carousel, testimonials, ₹499 report packages, Cashfree checkout, private order tracking and manually uploaded PDFs.
+A Next.js App Router website with a Node.js / Express API served inside Next.js, MongoDB storage and Cloudinary uploads. Local SQLite development remains available. Includes the selected ivory-and-plum UI, free birth/life-path calculator, portrait carousel, testimonials, ₹499 report packages, Cashfree checkout, private order tracking and manually uploaded PDFs.
 
 ## Run locally
 
@@ -15,7 +15,7 @@ npm run dev
 - Website: http://localhost:3000
 - Admin: http://localhost:3000/admin
 - Initial local login: see the ignored `local-access.txt` file created by setup. The password is random; no fixed default password is shipped.
-- The API binds to loopback on port 4000. Next.js proxies `/api` to it. Browser requests use the same origin.
+- Next.js serves `/api` directly on port 3000. No separate backend process is needed.
 - `setup:local` never replaces an existing administrator. Change the generated password in Settings before deployment.
 
 ## Admin workflows
@@ -67,22 +67,17 @@ npm test
 npm run build
 ```
 
-Tests use an isolated temporary SQLite database and mocked Cashfree responses. They cover date validation, numerology, auth, origin checks, draft visibility, concurrent edit protection, payment amount validation, webhook verification/idempotency, PDF release, private downloads and session revocation.
+Tests use isolated SQLite and MongoDB replica-set databases, with mocked Cashfree, Cloudinary and SMTP responses. The MongoDB test downloads a temporary test binary on its first run. They cover date validation, numerology, auth, origin checks, draft visibility, concurrent edit protection, payment amount validation, webhook verification/idempotency, PDF release, private downloads and session revocation.
 
 ## Deployment
 
-This is genuine Next.js plus a long-running Node.js backend, not a static export or Cloudflare Worker. Deploy to a Node-capable VM/container with a persistent disk. SQLite and local files require a **single API instance**; do not deploy to ephemeral serverless storage or horizontally scale the API without migrating storage.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for Vercel + MongoDB + Cloudinary setup.
+The Node API runs inside Next.js; no separate backend or API_URL is needed.
+With MONGODB_URI configured, MongoDB stores orders, content, admin sessions and
+notification records. Cloudinary stores files; customer PDFs are authenticated.
+Local development without MongoDB retains SQLite/files. Vercel requires MongoDB
+and never silently writes ephemeral data. Uploads are limited to 4 MB.
 
-1. Set a public HTTPS `APP_ORIGIN`, loopback `API_URL`, Cashfree and SMTP environment variables.
-2. Run `npm ci` and `npm run build`.
-3. Create an admin with `ADMIN_PASSWORD` set securely in the environment and run `npm run admin:create`; it prompts for the email. Remove the temporary environment password afterwards. No public account registration exists.
-4. Run `npm start` behind an HTTPS reverse proxy to port 3000. This command starts both processes in production and requires an HTTPS origin. For containers, the included Dockerfile sets `WEB_HOST=0.0.0.0`; persist `/app/data` in a volume. Initialize the production administrator in the same volume.
-5. Permit uploads of at least 12 MB at the reverse proxy, with suitable timeouts. Never expose port 4000 to the internet. Configure normal host monitoring and TLS renewal.
-6. Back up the complete `data/` directory: database, reports and images. Use SQLite's online backup mechanism or stop the API for a consistent filesystem backup; do not copy only a live `.sqlite` file without its WAL. Test restoration before accepting payments.
-
-Admin sessions are random, server-stored, HTTP-only, SameSite=Strict, expire after eight hours and use Secure cookies in production. Mutation endpoints enforce the configured Origin. Changing an admin password revokes all sessions. Portraits are public; PDFs remain outside public assets. Requests are validated, uploads are bounded and sensitive endpoints are rate limited. The default in-memory rate limiter is suitable for this single-instance launch; multi-instance deployment needs a shared store.
-
-Before public launch, provide actual portraits, consented testimonials, support details, final policies, the domain/hosting account, and Cashfree/SMTP credentials. Nothing is published to an external host by these local commands.
 ### Report catalogue and intake
 
 The public site now offers nine categories: Individual Life, Relationship Compatibility, Marriage Date & Muhurat, Baby Name, Name Correction, Career & Money, Business Name, Mobile & Vehicle Number Check, and Yearly Personal Forecast. Prices and card content remain editable under Admin → Reports & pricing. The one-time `report-catalog-v2` migration preserves existing prices and subsequent admin edits.
