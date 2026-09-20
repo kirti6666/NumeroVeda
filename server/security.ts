@@ -11,10 +11,11 @@ export function originGuard(req:Request,res:Response,next:NextFunction){
  const origin=typeof req.headers.origin==='string'?req.headers.origin:'';
  const allowed=new Set([process.env.APP_ORIGIN||'http://localhost:3000']);
  if(process.env.NODE_ENV!=='production'){allowed.add('http://127.0.0.1:3000');allowed.add('http://localhost:3000');}
- // A Vercel preview has a different, trusted host from the production domain.
- // Accept only the exact HTTPS host that received this request, never an arbitrary Origin header.
+ // A preview/custom deployment can differ from APP_ORIGIN. Accept only the
+ // exact HTTPS host that received this request, never an arbitrary Origin header.
  const host=String(req.headers['x-forwarded-host']||req.headers.host||'').split(',')[0].trim().toLowerCase();
- if(process.env.VERCEL==='1'&&host.endsWith('.vercel.app'))allowed.add('https://'+host);
+ const protocol=String(req.headers['x-forwarded-proto']||req.protocol||'').split(',')[0].trim().toLowerCase();
+ if(host&&protocol==='https')allowed.add('https://'+host);
  if(!origin||!allowed.has(origin))return res.status(403).json({error:'Request origin is not allowed.'});
  next();
 }
