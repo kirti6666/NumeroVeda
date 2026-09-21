@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+type Health={ok:boolean;store:string;adminConfigured:boolean;bootstrapReady:boolean};
+test('a deployment creates its first administrator from ADMIN_EMAIL and ADMIN_PASSWORD',async(t)=>{
+ process.env.MONGODB_URI='';process.env.DATA_DIR=mkdtempSync(path.join(tmpdir(),'numeroveda-bootstrap-'));process.env.APP_ORIGIN='http://localhost:3000';
+ process.env.ADMIN_EMAIL=' Bootstrap@Example.Test ';process.env.ADMIN_PASSWORD='Bootstrap-test-password';
+ const {createApp}=await import('../server/app');const {db}=await import('../server/db');
+ const server=createApp().listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
+ t.after(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));db.close();});
+ const login=(email:string,password:string)=>fetch(base+'/api/auth/login',{method:'POST',headers:{Origin:'http://localhost:3000','Content-Type':'application/json'},body:JSON.stringify({email,password})});
+ const health=async()=>await (await fetch(base+'/api/health')).json() as Health;
+ await t.test('health announces that the pending bootstrap will run',async()=>{const body=await health();assert.equal(body.adminConfigured,false);assert.equal(body.bootstrapReady,true);});
+ await t.test('a wrong password creates the account but does not sign anyone in',async()=>{assert.equal((await login('bootstrap@example.test','Not-the-configured-one')).status,401);const body=await health();assert.equal(body.adminConfigured,true);assert.equal(body.bootstrapReady,false);});
+ await t.test('the configured credentials sign in and the email is normalised',async()=>{const response=await login('BOOTSTRAP@example.test','Bootstrap-test-password');assert.equal(response.status,200);assert.match(response.headers.get('set-cookie')||'',/nv_admin=[a-f0-9]{64}/);assert.equal(db.prepare('SELECT COUNT(*) AS total FROM users').get()?.total,1);});
+ await t.test('an unrelated email is rejected and never creates a second account',async()=>{assert.equal((await login('someone-else@example.test','Bootstrap-test-password')).status,401);assert.equal(db.prepare('SELECT COUNT(*) AS total FROM users').get()?.total,1);});
+ await t.test('changing the variables afterwards is ignored once an administrator exists',async()=>{process.env.ADMIN_EMAIL='intruder@example.test';process.env.ADMIN_PASSWORD='Intruder-test-password';assert.equal((await login('intruder@example.test','Intruder-test-password')).status,401);assert.equal(db.prepare('SELECT COUNT(*) AS total FROM users').get()?.total,1);assert.equal((await health()).bootstrapReady,false);});
+ await t.test('the bootstrap is recorded in the audit trail',async()=>{const row=db.prepare("SELECT target FROM audit WHERE action='admin.bootstrap'").get() as {target:string}|undefined;assert.equal(row?.target,'bootstrap@example.test');});
+});

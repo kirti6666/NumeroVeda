@@ -25,8 +25,25 @@ Do not share the production database with unrestricted preview deployments.
 
 ## First administrator
 
-On your computer, put the same MongoDB credentials in the ignored `.env`, set
-`ADMIN_EMAIL` and a unique `ADMIN_PASSWORD` of at least 12 characters, then run:
+Set `ADMIN_EMAIL` and a unique `ADMIN_PASSWORD` of at least 12 characters under
+Vercel Project Settings > Environment Variables, redeploy, then sign in at
+https://nmveda.vercel.app/admin with exactly those two values. That first sign-in creates the account in MongoDB and
+records `admin.bootstrap` in the audit trail.
+
+It runs only while the `users` collection is empty. Once an administrator exists the
+two variables are ignored completely: they cannot create a second account, change an
+existing password, or let a different email in. So finish the job: change your
+password under Admin > Settings, then **delete `ADMIN_PASSWORD` from Vercel and
+redeploy**. Until you do, the dashboard shows a warning, because anyone who can read
+your environment variables can read that password.
+
+`"bootstrapReady": true` in `/api/health` means the deployment holds both variables
+and has no administrator yet, so signing in with them will work.
+
+### From a shell instead
+
+With the production `MONGODB_URI` in your local ignored `.env`, set `ADMIN_EMAIL`
+and `ADMIN_PASSWORD` and run:
 
 ```sh
 npm run admin:create
@@ -34,9 +51,8 @@ npm run admin:create
 
 The script prints the database it writes to. It must name your Atlas cluster, not
 a local SQLite file: without `MONGODB_URI` in `.env` it writes to your computer
-only and the deployment never sees that administrator. Remove ADMIN_PASSWORD
-afterwards. There is no public signup endpoint.
-Sign in at https://nmveda.vercel.app/admin.
+only and the deployment never sees that administrator. There is no public signup
+endpoint.
 
 Forgotten password, or an administrator created against the wrong database? Set
 `ADMIN_EMAIL` and a new `ADMIN_PASSWORD`, keep the production `MONGODB_URI` in
