@@ -32,9 +32,24 @@ On your computer, put the same MongoDB credentials in the ignored `.env`, set
 npm run admin:create
 ```
 
-Remove ADMIN_PASSWORD afterwards. The script creates an administrator in MongoDB
-without a public signup endpoint and does not reset an existing user.
+The script prints the database it writes to. It must name your Atlas cluster, not
+a local SQLite file: without `MONGODB_URI` in `.env` it writes to your computer
+only and the deployment never sees that administrator. Remove ADMIN_PASSWORD
+afterwards. There is no public signup endpoint.
 Sign in at https://nmveda.vercel.app/admin.
+
+Forgotten password, or an administrator created against the wrong database? Set
+`ADMIN_EMAIL` and a new `ADMIN_PASSWORD`, keep the production `MONGODB_URI` in
+`.env`, and run `npm run admin:reset`. It replaces the password of the existing
+administrator and signs out every admin session. Without `--reset` the script
+refuses to touch an existing account.
+
+`GET /api/health` reports which database the deployment reads (`"store"`) and
+whether an administrator exists there (`"adminConfigured"`). If sign-in fails,
+check that first: `adminConfigured: false` means the account is missing from the
+production database, and the sign-in page says so instead of reporting a wrong
+password. A sign-in that reports "Too many requests" is the 20-attempts-per-15-
+minutes limit per IP address; wait for the window to pass.
 
 The first initialization creates nine reports at INR 499 and disables payments.
 Later initialization never resets prices or deleted reports. Your local SQLite
@@ -64,7 +79,8 @@ if a process crashes after sending but before recording success; check before re
 
 ## Verify before accepting payments
 
-1. `/api/health` and `/api/public` succeed; live prices replace the outage preview.
+1. `/api/health` and `/api/public` succeed, `/api/health` reports `"store":"mongodb"`
+   and `"adminConfigured":true`; live prices replace the outage preview.
 2. Admin login, prices and content persist after redeploy.
 3. A sandbox checkout stores the category answers and sends confirmation.
 4. Upload/review/release a sample PDF; check customer download and delivery email.

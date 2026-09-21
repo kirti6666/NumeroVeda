@@ -17,6 +17,8 @@ npm run dev
 - Initial local login: see the ignored `local-access.txt` file created by setup. The password is random; no fixed default password is shipped.
 - Next.js serves `/api` directly on port 3000. No separate backend process is needed.
 - `setup:local` never replaces an existing administrator. Change the generated password in Settings before deployment.
+- Locked out? `ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=<12+ characters> npm run admin:reset` sets a new password. It targets the database named in its first output line: MongoDB when `MONGODB_URI` is set, local SQLite otherwise.
+- `GET /api/health` reports `store` and `adminConfigured`, so you can confirm the deployment reads the database that holds your administrator.
 
 ## Admin workflows
 

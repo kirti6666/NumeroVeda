@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "admin:create": "tsx scripts/create-admin.ts",
+    "admin:reset": "tsx scripts/create-admin.ts --reset",
     "setup:local": "tsx scripts/setup-local.ts"
   },
   "engines": {
