@@ -4,7 +4,7 @@ import {defaultSettings} from './defaults';
 import {mongo,usesMongo,localDb} from './mongo';
 const conflict=()=>Object.assign(new Error('This record changed in another request. Reload before saving.'),{status:409});
 const versions=new WeakMap<Order,number>();
-export async function settings():Promise<Settings>{return usesMongo()?{...defaultSettings,...(await (await mongo()).collection('settings').findOne({name:'site'}))?.data}:(await localDb()).settings();}
+export async function settings():Promise<Settings>{const value=usesMongo()?{...defaultSettings,...(await (await mongo()).collection('settings').findOne({name:'site'}))?.data}:(await localDb()).settings();return {...value,brand:value.brand.trim().toLowerCase()==='numeroveda'?'NumeroVedaa':value.brand};}
 export async function setSettings(value:Settings){if(usesMongo())await (await mongo()).collection('settings').updateOne({name:'site'},{$set:{data:value}},{upsert:true});else (await localDb()).db.prepare('UPDATE settings SET data=? WHERE id=1').run(JSON.stringify(value));}
 export async function audit(action:string,target:string){if(usesMongo())await (await mongo()).collection('audit').insertOne({id:randomUUID(),at:new Date().toISOString(),action,target});else (await localDb()).audit(action,target);}
 export async function recentAudit(){return usesMongo()?(await mongo()).collection('audit').find({},{projection:{_id:0}}).sort({at:-1}).limit(15).toArray():(await localDb()).db.prepare('SELECT * FROM audit ORDER BY at DESC LIMIT 15').all();}
