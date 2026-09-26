@@ -73,8 +73,6 @@
 .focus-options label{display:inline-flex;gap:8px;align-items:center;margin:6px 18px 6px 0;font-weight:400;font-size:.83rem}
 .focus-options input[type=checkbox]{width:17px;height:17px;accent-color:var(--plum)}
 .checkout-review{margin:20px 0}.checkout-review>div{padding:10px 0;border-bottom:1px solid var(--line)}.checkout-review dt{font-size:.75rem;color:var(--muted)}.checkout-review dd{margin:4px 0 0;white-space:pre-line;overflow-wrap:anywhere;font-size:.9rem}.checkout-answers{margin-bottom:24px}.checkout-answers summary{cursor:pointer;font-size:.88rem}.order-summary>.button{margin-top:20px}
-.portrait-demo-label{position:absolute;bottom:0;left:50%;transform:translateX(-50%);z-index:5;font-size:.6rem;color:var(--muted);white-space:nowrap}
-.portrait-toggle{position:absolute;top:0;right:0;z-index:5;width:30px;height:30px;background:var(--white)}
 .reference-hero{overflow:hidden;background:linear-gradient(180deg,#f8f4ec 0%,#faf9f7 100%)}
 .reference-copy{position:relative;isolation:isolate}
 .reference-copy:before{content:'';position:absolute;z-index:-1;pointer-events:none;inset:-95px -75px;background:url('/images/numerology-hero.png') center/cover no-repeat;opacity:.34;mask-image:radial-gradient(ellipse at center,#000 15%,#000b 45%,transparent 72%);-webkit-mask-image:radial-gradient(ellipse at center,#000 15%,#000b 45%,transparent 72%)}
@@ -120,7 +118,6 @@
 .client-stories>.container{max-width:1080px}
 .client-stories .section-heading h2{font-size:2.65rem;line-height:1.08}
 .testimonial-intro{font-size:.88rem;margin-top:12px}
-.sample-review-note{text-align:center;font-size:.72rem;color:var(--muted);margin:-7px 0 22px}
 .review-card-top{display:flex;justify-content:space-between;align-items:center;width:100%;gap:12px}
 .review-card-top>span{font-size:.56rem;letter-spacing:.12em;opacity:.7}
 .reference-home .client-stories .testimonial{text-align:left;align-items:stretch;border-radius:14px;padding:24px;box-shadow:0 8px 24px #48263106}
@@ -128,7 +125,7 @@
 .client-stories .testimonial footer{display:flex;align-items:center;gap:11px}
 .client-stories .testimonial footer strong{font-size:.78rem;font-weight:500}
 .client-stories .testimonial footer .review-avatar{display:grid;place-items:center;width:35px;height:35px;flex-shrink:0;border:1px solid #a7803e55;border-radius:50%;font:1.2rem var(--serif);margin:0;opacity:1}
-@media(max-width:760px){.reference-home .client-stories{padding-block:32px}.client-stories .section-heading h2{font-size:2.2rem}.reference-home .client-stories .testimonial{padding:20px}.reference-home .client-stories .testimonial p{font-size:1.3rem;margin-block:14px 18px}.sample-review-note{max-width:280px;margin-inline:auto}}
+@media(max-width:760px){.reference-home .client-stories{padding-block:32px}.client-stories .section-heading h2{font-size:2.2rem}.reference-home .client-stories .testimonial{padding:20px}.reference-home .client-stories .testimonial p{font-size:1.3rem;margin-block:14px 18px}}
 
 /* Keep the primary action statement intact across responsive widths. */
 .reference-copy{min-width:0}
@@ -180,3 +177,28 @@ body,.reference-home{background:var(--paper)}
  .mobile-hero-stats strong{font-size:clamp(1.2rem,5vw,1.5rem);line-height:1;color:var(--plum);white-space:nowrap}
  .mobile-hero-stats span{margin-top:7px;font-size:.65rem;line-height:1.25}
 }
+
+/* Two report cards per row on desktop and tablet, one per row on phones. */
+.reference-reports{max-width:1060px}
+.report-stack{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media(min-width:601px) and (max-width:900px){
+ .reference-report{grid-template-columns:120px 1fr;padding:18px;gap:10px 14px}
+ .book-scene{width:120px;min-height:160px}
+ .report-book{width:95px;min-height:142px;padding:10px 6px}
+ .book-page{width:58px;height:133px;top:17px}
+ .report-includes ul{grid-template-columns:1fr}
+}
+@media(max-width:680px){.report-stack{grid-template-columns:1fr}}
+
+/* Plain, photo-free numerologist cards. */
+.team-grid{display:flex;flex-direction:column;gap:14px}
+.team-card{display:flex;gap:14px;align-items:flex-start;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.team-mark{flex-shrink:0;width:42px;height:42px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);display:grid;place-items:center}
+.team-card h3{font-size:1.05rem;font-weight:500;margin:0 0 2px}
+.team-card .role{display:block;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--plum);margin-bottom:6px}
+.team-card p{font-size:.85rem;line-height:1.55;margin:0}
+
+/* Footer: company details and placeholder contact info. */
+.footer-detail{font-size:.86rem;line-height:1.7;margin-top:6px}
+.footer-grid span.footer-placeholder{color:var(--gold);display:flex;align-items:center;gap:7px;margin:9px 0;font-size:.8rem}
+.footer-detail span.footer-placeholder{display:inline;margin:0}
