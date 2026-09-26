@@ -191,7 +191,7 @@ body,.reference-home{background:var(--paper)}
 @media(max-width:680px){.report-stack{grid-template-columns:1fr}}
 
 /* Footer company details. */
-.footer-detail{font-size:.86rem;line-height:1.7;margin-top:6px}
+.footer-grid .footer-detail{font-size:.86rem;line-height:1.7;margin-top:6px}
 
 /* Policy, contact and about pages. */
 .legal-page h1{margin:18px 0 8px}
@@ -207,3 +207,18 @@ body,.reference-home{background:var(--paper)}
 .contact-card strong{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--plum);font-weight:500}
 .contact-card span{font-size:.9rem}
 @media(max-width:760px){.contact-cards{grid-template-columns:1fr}}
+
+/* Compact footer on phones: tighter spacing, policies in two columns. */
+@media(max-width:760px){
+ .site-footer{padding-top:26px}
+ .footer-grid{gap:18px 16px;padding-bottom:16px}
+ .footer-grid .brand{font-size:1.5rem}
+ .footer-grid .brand-mark{width:32px;height:32px}
+ .footer-grid>div:first-child p{margin-top:8px;font-size:.8rem;line-height:1.5}
+ .footer-grid h3{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+ .footer-grid>div>a:not(.brand){margin:5px 0;font-size:.78rem}
+ .footer-grid .footer-detail{font-size:.78rem;line-height:1.55;margin-top:0}
+ .footer-grid>div:last-child{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:16px}
+ .footer-grid>div:last-child h3{grid-column:1/-1}
+ .footer-bottom{flex-direction:row;flex-wrap:wrap;justify-content:space-between;padding-block:12px;font-size:.68rem}
+}
