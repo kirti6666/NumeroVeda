@@ -1,0 +1,4 @@
+import {SiteShell} from './site-shell';
+import {business} from '@/lib/business';
+export function LegalPage({eyebrow,title,updated=true,children}:{eyebrow:string;title:string;updated?:boolean;children:React.ReactNode}){return <SiteShell><section className="container section policy-page legal-page"><div className="eyebrow">{eyebrow}</div><h1>{title}</h1>{updated&&<p className="legal-updated">Last updated: {business.policiesUpdated}</p>}{children}</section></SiteShell>;}
+export function ContactDetails({heading='Contact us'}:{heading?:string}){return <article><h2>{heading}</h2><ul className="legal-list"><li>Email: <a href={'mailto:'+business.email}>{business.email}</a></li><li>Phone / WhatsApp: <a href={'tel:'+business.phoneHref}>{business.phone}</a></li><li>Business name: {business.legalName}</li><li>GST: {business.gst}</li></ul></article>;}

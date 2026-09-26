@@ -1,4 +1,2 @@
-'use client';
-import {SiteShell} from '@/components/site-shell';
-import {usePublic} from '@/components/provider';
-export default function Policies(){const {data}=usePublic();return <SiteShell><section className="container section policy-page"><div className="eyebrow">THE DETAILS THAT MATTER</div><h1>Care, clarity<br/>and <em>transparency.</em></h1><article><h2>Delivery</h2><p>Your report is manually prepared and reviewed. Your delivery window is 12–24 hours after verified payment and receipt of complete details. Download your PDF through the secure tracking page.</p></article>{[['terms','Terms of service'],['privacyPolicy','Privacy'],['refundPolicy','Cancellations & refunds']].map(([key,label])=><article key={key}><h2>{label}</h2><p className="preserve-lines">{data?String(data.settings[key as keyof typeof data.settings]):'Loading…'}</p></article>)}{data?.settings.email&&<p>Questions? <a href={'mailto:'+data.settings.email}>{data.settings.email}</a></p>}</section></SiteShell>;}
+import {permanentRedirect} from 'next/navigation';
+export default function Policies(){permanentRedirect('/terms-and-conditions');}
